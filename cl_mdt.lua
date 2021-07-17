@@ -20,7 +20,7 @@ RegisterCommand('mdt', function()
     end
 end, false)
 
-RegisterKeyMapping('mdt', 'Display the mdt', 'keyboard', 'delete')
+RegisterKeyMapping('mdt', 'Display the mdt', 'keyboard', 'PAGEUP')
 
 TriggerServerEvent("mdt:getOffensesAndOfficer")
 
