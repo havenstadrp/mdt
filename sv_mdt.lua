@@ -239,13 +239,19 @@ AddEventHandler("mdt:saveOffenderChanges", function(id, changes, identifier)
 				['@bail'] = changes.bail
 			})
 		end
-		for i = 1, #changes.licenses_removed do
-			local license = changes.licenses_removed[i]
-			exports.ghmattimysql:execute('DELETE FROM `user_licenses` WHERE `type` = @type AND `owner` = @identifier', {
-				['@type'] = license.type,
-				['@identifier'] = identifier
-			})
-		end
+        if changes.licenses_removed ~= nil then
+            local Player = QBCore.Functions.GetPlayer(usource)
+            local licenses = Player.PlayerData.metadata["licences"]
+            for i = 1, #changes.licenses_removed do
+                local license = changes.licenses_removed[i]
+                if license.type == 'driver_license' then
+                    licenses.driver = false
+                elseif license.type == 'weaponlicense' then
+                    licenses.weapon = false
+                end
+            end
+            Player.Functions.SetMetaData("licences", licenses)
+        end
 
 		if changes.convictions ~= nil then
 			for conviction, amount in pairs(changes.convictions) do	
@@ -617,6 +623,8 @@ function GetLicenses(identifier, cb)
 
 				if type == "driver" then
 					licenseType = "driver_license" label = "Drivers License"
+                elseif type == "weapon" then
+                    licenseType = "weaponlicense" label = "Firearms License"
 				end
 
 				table.insert(licenses, {
