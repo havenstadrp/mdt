@@ -263,12 +263,8 @@ RegisterServerEvent("mdt:performReportSearch")
 AddEventHandler("mdt:performReportSearch", function(query)
 	local usource = source
 	local matches = {}
-	exports.oxmysql:fetch("SELECT * FROM `mdt_reports` WHERE `id` LIKE ? OR LOWER(`title`) LIKE ? OR LOWER(`name`) LIKE ? OR LOWER(`author`) LIKE ? or LOWER(`charges`) LIKE ?", {
-		string.lower('%'..query..'%'), 
-		string.lower('%'..query..'%'), 
-		string.lower('%'..query..'%'), 
-		string.lower('%'..query..'%'), 
-		string.lower('%'..query..'%')
+	exports.oxmysql:fetch("SELECT * FROM `mdt_reports` WHERE `id` LIKE :test OR LOWER(`title`) LIKE :test OR LOWER(`name`) LIKE :test OR LOWER(`author`) LIKE :test or LOWER(`charges`) LIKE :test", {
+		test = string.lower('%'..query..'%')
 	}, function(result) -- % wildcard, needed to search for all alike results
 
 		for index, data in ipairs(result) do
