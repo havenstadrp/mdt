@@ -1,7 +1,7 @@
 <html style="overflow-y: hidden;">
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.2/css/all.css">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:100,200,300" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="main.css">
     <link rel="stylesheet" type="text/css" href="styles/police.css">
     <style>
@@ -15,21 +15,21 @@
 <body>
     <div id="container">
         <div v-bind:class="getClass('content')">
-            <p style="font-family: 'Montserrat'; font-style: sans-serif; font-size: 20pt; text-align: center;">San Andreas State Database</p>
+            <p style="font-family: 'Poppins'; font-style: sans-serif; font-size: 20pt; text-align: center; color: #ffbb24;">San Andreas State Database</p>
             <p style="text-align: center;">Welcome, {{ officer.rank }}{{ officer.name }}.</p>
             <div class="wrapper">
-            <div class="sidebar"style="position: fixed; left: 0%; top: 0%; bottom: 3%;">
-                <img src="badges/police.png" width="120" height="120" style="position: relative; left: 12%; top: 1.2%;">
+            <div class="sidebar"style="position: fixed; left: 1%; top: 0%; bottom: 3%;">
+                <img src="badges/police.png" width="120" height="120" style="position: relative; left: 17%; top: 1%;">
                 <h2></h2>
-                <button type="button" v-on:click="closeMDT()" style="position: fixed; left: 2.5%; bottom: 3%">LOGOUT</button>
+                <button type="button" v-on:click="closeMDT()" style="position: fixed; left: 1%; bottom: 3%; width: 12%">LOGOUT</button>
                 <ul>
-                    <li v-on:click="changePage('Home')" id="home" >Home</li>
-                    <li v-on:click="changePage('Search Offenders')" id="search-offenders" >Search Citizen</li>
-                    <li v-on:click="changePage('Search Vehicles')" id="search-vehicles" >Search Vehicles</li>
-                    <li v-on:click="changePage('Search Reports')" id="search-reports" >Search Reports</li>
-                    <li v-on:click="changePage('Submit Report')" id="submit-report" >Create Report</li>
-                    <li v-on:click="changePage('Calls')" id="calls" >Calls</li>
-                    <li v-on:click="changePage('Warrants')" id="warrants" >Warrants</li>
+                    <li v-on:click="changePage('Home')" id="home"><i class="fas fa-home"></i>&nbsp;&nbsp;Home</li>
+                    <li v-on:click="changePage('Search Offenders')" id="search-offenders" ><i class="fas fa-user-friends"></i>&nbsp;&nbsp;Search Citizen</li>
+                    <li v-on:click="changePage('Search Vehicles')" id="search-vehicles" ><i class="fas fa-car"></i>&nbsp;&nbsp;Search Vehicles</li>
+                    <li v-on:click="changePage('Search Reports')" id="search-reports" ><i class="fas fa-book"></i>&nbsp;&nbsp;Search Reports</li>
+                    <li v-on:click="changePage('Submit Report')" id="submit-report" ><i class="fas fa-edit"></i>&nbsp;&nbsp;Create Report</li>
+                    <li v-on:click="changePage('Calls')" id="calls" ><i class="fas fa-bell"></i>&nbsp;&nbsp;Calls</li>
+                    <li v-on:click="changePage('Warrants')" id="warrants" ><i class="fas fa-user-clock"></i>&nbsp;&nbsp;Warrants</li>
                 </ul>
             </div>
 
