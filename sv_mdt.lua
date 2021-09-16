@@ -5,11 +5,11 @@ AddEventHandler("mdt:hotKeyOpen", function()
 	local usource = source
     local xPlayer = QBCore.Functions.GetPlayer(usource)
     if xPlayer.PlayerData.job.name == 'police' then
-    	exports['ghmattimysql']:execute("SELECT * FROM (SELECT * FROM `mdt_reports` ORDER BY `id` DESC LIMIT 3) sub ORDER BY `id` DESC", {}, function(reports)
+    	exports.oxmysql:fetch("SELECT * FROM (SELECT * FROM `mdt_reports` ORDER BY `id` DESC LIMIT 3) sub ORDER BY `id` DESC", {}, function(reports)
     		for r = 1, #reports do
     			reports[r].charges = json.decode(reports[r].charges)
     		end
-    		exports['ghmattimysql']:execute("SELECT * FROM (SELECT * FROM `mdt_warrants` ORDER BY `id` DESC LIMIT 3) sub ORDER BY `id` DESC", {}, function(warrants)
+    		exports.oxmysql:fetch("SELECT * FROM (SELECT * FROM `mdt_warrants` ORDER BY `id` DESC LIMIT 3) sub ORDER BY `id` DESC", {}, function(warrants)
     			for w = 1, #warrants do
     				warrants[w].charges = json.decode(warrants[w].charges)
     			end
@@ -24,8 +24,7 @@ RegisterServerEvent("mdt:getOffensesAndOfficer")
 AddEventHandler("mdt:getOffensesAndOfficer", function()
 	local usource = source
 	local charges = {}
-	exports['ghmattimysql']:execute('SELECT * FROM fine_types', {
-	}, function(fines)
+	exports.oxmysql:fetch('SELECT * FROM fine_types', {}, function(fines)
 		for j = 1, #fines do
 			if fines[j].category == 0 or fines[j].category == 1 or fines[j].category == 2 or fines[j].category == 3 then
 				table.insert(charges, fines[j])
@@ -42,9 +41,7 @@ RegisterServerEvent("mdt:performOffenderSearch")
 AddEventHandler("mdt:performOffenderSearch", function(query)
 	local usource = source
 	local matches = {}
-	exports['ghmattimysql']:execute("SELECT * FROM `players` WHERE `charinfo` LIKE @query", {
-		['@query'] = string.lower('%'..query..'%') -- % wildcard, needed to search for all alike results
-	}, function(result)
+	exports.oxmysql:fetch("SELECT * FROM `players` WHERE `charinfo` LIKE ?", {string.lower('%'..query..'%')}, function(result) -- % wildcard, needed to search for all alike results
 
 		for index, data in ipairs(result) do
 			if data.charinfo then
@@ -73,9 +70,7 @@ AddEventHandler("mdt:getOffenderDetails", function(offender)
 	local usource = source
 	GetLicenses(offender.citizenid, function(licenses) offender.licenses = licenses end)
 	while offender.licenses == nil do Citizen.Wait(0) end
-    exports['ghmattimysql']:execute('SELECT * FROM `user_mdt` WHERE `char_id` = @id', {
-		['@id'] = offender.id
-	}, function(result)
+    exports.oxmysql:fetch('SELECT * FROM `user_mdt` WHERE `char_id` = ?', {offender.id}, function(result)
 
         offender.notes = ""
         offender.mugshot_url = ""
@@ -86,9 +81,7 @@ AddEventHandler("mdt:getOffenderDetails", function(offender)
             offender.bail = result[1].bail
         end
 
-        exports['ghmattimysql']:execute('SELECT * FROM `user_convictions` WHERE `char_id` = @id', {
-            ['@id'] = offender.id
-        }, function(convictions)
+        exports.oxmysql:fetch('SELECT * FROM `user_convictions` WHERE `char_id` = ?', {offender.id}, function(convictions)
 
             if convictions[1] then
                 offender.convictions = {}
@@ -98,17 +91,13 @@ AddEventHandler("mdt:getOffenderDetails", function(offender)
                 end
             end
 
-            exports['ghmattimysql']:execute('SELECT * FROM `mdt_warrants` WHERE `char_id` = @id', {
-                ['@id'] = offender.id
-            }, function(warrants)
+            exports.oxmysql:fetch('SELECT * FROM `mdt_warrants` WHERE `char_id` = ?', {offender.id}, function(warrants)
 
                 if warrants[1] then
                     offender.haswarrant = true
                 end
 
-				exports['ghmattimysql']:execute('SELECT * FROM `player_vehicles` WHERE `citizenid` = @citizenid', {
-					['@citizenid'] = offender.citizenid
-				}, function(vehicles)
+				exports.oxmysql:fetch('SELECT * FROM `player_vehicles` WHERE `citizenid` = ?', {}, function(vehicles)
 					for i = 1, #vehicles do
 						vehicles[i].model = vehicles[i].vehicle
 						if vehicles[i].mods then
@@ -138,9 +127,7 @@ end)
 RegisterServerEvent("mdt:getOffenderDetailsById")
 AddEventHandler("mdt:getOffenderDetailsById", function(char_id)
     local usource = source
-    exports['ghmattimysql']:execute('SELECT * FROM `players` WHERE `id` = @id', {
-		['@id'] = char_id
-	}, function(result)
+    exports.oxmysql:fetch('SELECT * FROM `players` WHERE `id` = ?', {char_id}, function(result)
 		local charinfo = json.decode(result[1].charinfo)
         local offender = result[1]
 
@@ -153,9 +140,7 @@ AddEventHandler("mdt:getOffenderDetailsById", function(char_id)
         GetLicenses(offender.citizenid, function(licenses) offender.licenses = licenses end)
         while offender.licenses == nil do Citizen.Wait(0) end
 
-        exports['ghmattimysql']:execute('SELECT * FROM `user_mdt` WHERE `char_id` = @id', {
-            ['@id'] = offender.id
-        }, function(result)
+        exports.oxmysql:fetch('SELECT * FROM `user_mdt` WHERE `char_id` = ?', {offender.id}, function(result)
 
             offender.notes = ""
             offender.mugshot_url = ""
@@ -166,9 +151,7 @@ AddEventHandler("mdt:getOffenderDetailsById", function(char_id)
                 offender.bail = result[1].bail
             end
 
-            exports['ghmattimysql']:execute('SELECT * FROM `user_convictions` WHERE `char_id` = @id', {
-                ['@id'] = offender.id
-            }, function(convictions) 
+            exports.oxmysql:fetch('SELECT * FROM `user_convictions` WHERE `char_id` = ?', {offender.id}, function(convictions) 
 
                 if convictions[1] then
                     offender.convictions = {}
@@ -178,17 +161,13 @@ AddEventHandler("mdt:getOffenderDetailsById", function(char_id)
                     end
                 end
 
-                exports['ghmattimysql']:execute('SELECT * FROM `mdt_warrants` WHERE `char_id` = @id', {
-                    ['@id'] = offender.id
-                }, function(warrants)
+                exports.oxmysql:fetch('SELECT * FROM `mdt_warrants` WHERE `char_id` = ?', {offender.id}, function(warrants)
                     
                     if warrants[1] then
                         offender.haswarrant = true
                     end
 
-                    exports['ghmattimysql']:execute('SELECT * FROM `player_vehicles` WHERE `citizenid` = @citizenid', {
-                        ['@citizenid'] = offender.citizenid
-                    }, function(vehicles)
+                    exports.oxmysql:fetch('SELECT * FROM `player_vehicles` WHERE `citizenid` = ?', {offender.citizenid}, function(vehicles)
                         for i = 1, #vehicles do
                             vehicles[i].model = vehicles[i].vehicle
                             if vehicles[i].mods then
@@ -221,47 +200,25 @@ end)
 RegisterServerEvent("mdt:saveOffenderChanges")
 AddEventHandler("mdt:saveOffenderChanges", function(id, changes, identifier)
 	local usource = source
-	exports['ghmattimysql']:execute('SELECT * FROM `user_mdt` WHERE `char_id` = @id', {
-		['@id']  = id
-	}, function(result)
+	exports.oxmysql:fetch('SELECT * FROM `user_mdt` WHERE `char_id` = ?', {id}, function(result)
 		if result[1] then
-			exports.ghmattimysql:execute('UPDATE `user_mdt` SET `notes` = @notes, `mugshot_url` = @mugshot_url, `bail` = @bail WHERE `char_id` = @id', {
-				['@id'] = id,
-				['@notes'] = changes.notes,
-				['@mugshot_url'] = changes.mugshot_url,
-				['@bail'] = changes.bail
-			})
+			exports.oxmysql:execute('UPDATE `user_mdt` SET `notes` = ?, `mugshot_url` = ?, `bail` = ? WHERE `char_id` = ?', {id, changes.notes, changes.mugshot_url, changes.bail})
 		else
-			exports.ghmattimysql:execute('INSERT INTO `user_mdt` (`char_id`, `notes`, `mugshot_url`, `bail`) VALUES (@id, @notes, @mugshot_url, @bail)', {
-				['@id'] = id,
-				['@notes'] = changes.notes,
-				['@mugshot_url'] = changes.mugshot_url,
-				['@bail'] = changes.bail
-			})
+			exports.oxmysql:insert('INSERT INTO `user_mdt` (`char_id`, `notes`, `mugshot_url`, `bail`) VALUES (?, ?, ?, ?)', {id, changes.notes, changes.mugshot_url, changes.bail})
 		end
 		for i = 1, #changes.licenses_removed do
 			local license = changes.licenses_removed[i]
-			exports.ghmattimysql:execute('DELETE FROM `user_licenses` WHERE `type` = @type AND `owner` = @identifier', {
-				['@type'] = license.type,
-				['@identifier'] = identifier
-			})
+			exports.oxmysql:execute('DELETE FROM `user_licenses` WHERE `type` = ? AND `owner` = ?', {license.type, identifier})
 		end
 
 		if changes.convictions ~= nil then
 			for conviction, amount in pairs(changes.convictions) do	
-				exports.ghmattimysql:execute('UPDATE `user_convictions` SET `count` = @count WHERE `char_id` = @id AND `offense` = @offense', {
-					['@id'] = id,
-					['@count'] = amount,
-					['@offense'] = conviction
-				})
+				exports.oxmysql:execute('UPDATE `user_convictions` SET `count` = ? WHERE `char_id` = ? AND `offense` = ?', {id, amount, conviction})
 			end
 		end
 
 		for i = 1, #changes.convictions_removed do
-			exports.ghmattimysql:execute('DELETE FROM `user_convictions` WHERE `char_id` = @id AND `offense` = @offense', {
-				['@id'] = id,
-				['offense'] = changes.convictions_removed[i]
-			})
+			exports.oxmysql:execute('DELETE FROM `user_convictions` WHERE `char_id` = ? AND `offense` = ?', {id, changes.convictions_removed[i]})
 		end
 
 		TriggerClientEvent("mdt:sendNotification", usource, "Offender changes have been saved.")
@@ -270,19 +227,13 @@ end)
 
 RegisterServerEvent("mdt:saveReportChanges")
 AddEventHandler("mdt:saveReportChanges", function(data)
-	exports.ghmattimysql:execute('UPDATE `mdt_reports` SET `title` = @title, `incident` = @incident WHERE `id` = @id', {
-		['@id'] = data.id,
-		['@title'] = data.title,
-		['@incident'] = data.incident
-	})
+	exports.oxmysql:execute('UPDATE `mdt_reports` SET `title` = ?, `incident` = ? WHERE `id` = ?', {data.id, data.title, data.incident})
 	TriggerClientEvent("mdt:sendNotification", source, "Report changes have been saved.")
 end)
 
 RegisterServerEvent("mdt:deleteReport")
 AddEventHandler("mdt:deleteReport", function(id)
-	exports.ghmattimysql:execute('DELETE FROM `mdt_reports` WHERE `id` = @id', {
-		['@id']  = id
-	})
+	exports.oxmysql:execute('DELETE FROM `mdt_reports` WHERE `id` = ?', {id})
 	TriggerClientEvent("mdt:sendNotification", source, "Report has been successfully deleted.")
 end)
 
@@ -292,36 +243,17 @@ AddEventHandler("mdt:submitNewReport", function(data)
 	local author = GetCharacterName(source)
 	charges = json.encode(data.charges)
 	data.date = os.date('%m-%d-%Y %H:%M:%S', os.time())
-	exports.ghmattimysql:execute('INSERT INTO `mdt_reports` (`char_id`, `title`, `incident`, `charges`, `author`, `name`, `date`) VALUES (@id, @title, @incident, @charges, @author, @name, @date)', {
-		['@id']  = data.char_id,
-		['@title'] = data.title,
-		['@incident'] = data.incident,
-		['@charges'] = charges,
-		['@author'] = author,
-		['@name'] = data.name,
-		['@date'] = data.date,
-	}, function(id)
+	exports.oxmysql:insert('INSERT INTO `mdt_reports` (`char_id`, `title`, `incident`, `charges`, `author`, `name`, `date`) VALUES (?, ?, ?, ?, ?, ?, ?)', {data.char_id, data.title, data.incident, charges, author, data.name, data.date,}, function(id)
 		TriggerEvent("mdt:getReportDetailsById", id, usource)
 		TriggerClientEvent("mdt:sendNotification", usource, "A new report has been submitted.")
 	end)
 
 	for offense, count in pairs(data.charges) do
-		exports['ghmattimysql']:execute('SELECT * FROM `user_convictions` WHERE `offense` = @offense AND `char_id` = @id', {
-			['@offense'] = offense,
-			['@id'] = data.char_id
-		}, function(result)
+		exports.oxmysql:fetch('SELECT * FROM `user_convictions` WHERE `offense` = ? AND `char_id` = ?', {offense, data.char_id}, function(result)
 			if result[1] then
-				exports.ghmattimysql:execute('UPDATE `user_convictions` SET `count` = @count WHERE `offense` = @offense AND `char_id` = @id', {
-					['@id']  = data.char_id,
-					['@offense'] = offense,
-					['@count'] = count + 1
-				})
+				exports.oxmysql:execute('UPDATE `user_convictions` SET `count` = ? WHERE `offense` = ? AND `char_id` = ?', {data.char_id, offense, count + 1})
 			else
-				exports.ghmattimysql:execute('INSERT INTO `user_convictions` (`char_id`, `offense`, `count`) VALUES (@id, @offense, @count)', {
-					['@id']  = data.char_id,
-					['@offense'] = offense,
-					['@count'] = count
-				})
+				exports.oxmysql:insert('INSERT INTO `user_convictions` (`char_id`, `offense`, `count`) VALUES (?, ?, ?)', {data.char_id, offense, count})
 			end
 		end)
 	end
@@ -331,9 +263,7 @@ RegisterServerEvent("mdt:performReportSearch")
 AddEventHandler("mdt:performReportSearch", function(query)
 	local usource = source
 	local matches = {}
-	exports['ghmattimysql']:execute("SELECT * FROM `mdt_reports` WHERE `id` LIKE @query OR LOWER(`title`) LIKE @query OR LOWER(`name`) LIKE @query OR LOWER(`author`) LIKE @query or LOWER(`charges`) LIKE @query", {
-		['@query'] = string.lower('%'..query..'%') -- % wildcard, needed to search for all alike results
-	}, function(result)
+	exports.oxmysql:fetch("SELECT * FROM `mdt_reports` WHERE `id` LIKE ? OR LOWER(`title`) LIKE ? OR LOWER(`name`) LIKE ? OR LOWER(`author`) LIKE ? or LOWER(`charges`) LIKE ?", {string.lower('%'..query..'%')}, function(result) -- % wildcard, needed to search for all alike results
 
 		for index, data in ipairs(result) do
 			data.charges = json.decode(data.charges)
@@ -348,9 +278,7 @@ RegisterServerEvent("mdt:performVehicleSearch")
 AddEventHandler("mdt:performVehicleSearch", function(query)
 	local usource = source
 	local matches = {}
-	exports['ghmattimysql']:execute("SELECT * FROM `player_vehicles` WHERE LOWER(`plate`) LIKE @query", {
-		['@query'] = string.lower('%'..query..'%') -- % wildcard, needed to search for all alike results
-	}, function(result)
+	exports.oxmysql:fetch("SELECT * FROM `player_vehicles` WHERE LOWER(`plate`) LIKE ?", {string.lower('%'..query..'%')}, function(result) -- % wildcard, needed to search for all alike results
 		for index, data in ipairs(result) do
 			data.model = data.vehicle
 			if data.mods ~= nil then
@@ -372,17 +300,15 @@ AddEventHandler("mdt:performVehicleSearchInFront", function(query)
 	local usource = source
 	local xPlayer = QBCore.Functions.GetPlayer(usource)
     if xPlayer.PlayerData.job.name == 'police' then
-    	exports['ghmattimysql']:execute("SELECT * FROM (SELECT * FROM `mdt_reports` ORDER BY `id` DESC LIMIT 3) sub ORDER BY `id` DESC", {}, function(reports)
+    	exports.oxmysql:fetch("SELECT * FROM (SELECT * FROM `mdt_reports` ORDER BY `id` DESC LIMIT 3) sub ORDER BY `id` DESC", {}, function(reports)
     		for r = 1, #reports do
     			reports[r].charges = json.decode(reports[r].charges)
     		end
-    		exports['ghmattimysql']:execute("SELECT * FROM (SELECT * FROM `mdt_warrants` ORDER BY `id` DESC LIMIT 3) sub ORDER BY `id` DESC", {}, function(warrants)
+    		exports.oxmysql:fetch("SELECT * FROM (SELECT * FROM `mdt_warrants` ORDER BY `id` DESC LIMIT 3) sub ORDER BY `id` DESC", {}, function(warrants)
     			for w = 1, #warrants do
     				warrants[w].charges = json.decode(warrants[w].charges)
     			end
-    			exports['ghmattimysql']:execute("SELECT * FROM `player_vehicles` WHERE `plate` = @query", {
-					['@query'] = query
-				}, function(result)
+    			exports.oxmysql:fetch("SELECT * FROM `player_vehicles` WHERE `plate` = ?", {query}, function(result)
 					local officer = GetCharacterName(usource)
     				TriggerClientEvent('mdt:toggleVisibilty', usource, reports, warrants, officer, xPlayer.PlayerData.job.name)
 					TriggerClientEvent("mdt:returnVehicleSearchInFront", usource, result, query)
@@ -395,9 +321,7 @@ end)
 RegisterServerEvent("mdt:getVehicle")
 AddEventHandler("mdt:getVehicle", function(vehicle)
 	local usource = source
-    exports['ghmattimysql']:execute("SELECT * FROM `players` WHERE `citizenid` = @query", {
-		['@query'] = vehicle.citizenid
-	}, function(result)
+    exports.oxmysql:fetch("SELECT * FROM `players` WHERE `citizenid` = ?", {vehicle.citizenid}, function(result)
 
 		if result[1] then
 			local player = json.decode(result[1].charinfo)
@@ -405,9 +329,7 @@ AddEventHandler("mdt:getVehicle", function(vehicle)
 			vehicle.owner_id = result[1].id
 		end
 
-        exports['ghmattimysql']:execute('SELECT * FROM `vehicle_mdt` WHERE `plate` = @plate', {
-            ['@plate'] = vehicle.plate
-        }, function(data)
+        exports.oxmysql:fetch('SELECT * FROM `vehicle_mdt` WHERE `plate` = ?', {vehicle.plate}, function(data)
 
             if data[1] then
                 if data[1].stolen == 1 then vehicle.stolen = true else vehicle.stolen = false end
@@ -417,17 +339,13 @@ AddEventHandler("mdt:getVehicle", function(vehicle)
                 vehicle.notes = ''
             end
 
-            exports['ghmattimysql']:execute('SELECT * FROM `mdt_warrants` WHERE `char_id` = @id', {
-                ['@id'] = vehicle.owner_id
-            }, function(warrants)
+            exports.oxmysql:fetch('SELECT * FROM `mdt_warrants` WHERE `char_id` = ?', {vehicle.owner_id}, function(warrants)
 
                 if warrants[1] then
                     vehicle.haswarrant = true
                 end
 
-                exports['ghmattimysql']:execute('SELECT `bail` FROM user_mdt WHERE `char_id` = @id', {
-                    ['@id'] = vehicle.owner_id
-                }, function(bail)
+                exports.oxmysql:fetch('SELECT `bail` FROM user_mdt WHERE `char_id` = ?', {vehicle.owner_id}, function(bail)
 
                     if bail and bail[1] and bail[1].bail == 1 then
                         vehicle.bail = true
@@ -445,7 +363,7 @@ end)
 RegisterServerEvent("mdt:getWarrants")
 AddEventHandler("mdt:getWarrants", function()
 	local usource = source
-	exports['ghmattimysql']:execute("SELECT * FROM `mdt_warrants`", {}, function(warrants)
+	exports.oxmysql:fetch("SELECT * FROM `mdt_warrants`", {}, function(warrants)
 		for i = 1, #warrants do
 			warrants[i].expire_time = ""
 			warrants[i].charges = json.decode(warrants[i].charges)
@@ -460,17 +378,7 @@ AddEventHandler("mdt:submitNewWarrant", function(data)
 	data.charges = json.encode(data.charges)
 	data.author = GetCharacterName(source)
 	data.date = os.date('%m-%d-%Y %H:%M:%S', os.time())
-	exports.ghmattimysql:execute('INSERT INTO `mdt_warrants` (`name`, `char_id`, `report_id`, `report_title`, `charges`, `date`, `expire`, `notes`, `author`) VALUES (@name, @char_id, @report_id, @report_title, @charges, @date, @expire, @notes, @author)', {
-		['@name']  = data.name,
-		['@char_id'] = data.char_id,
-		['@report_id'] = data.report_id,
-		['@report_title'] = data.report_title,
-		['@charges'] = data.charges,
-		['@date'] = data.date,
-		['@expire'] = data.expire,
-		['@notes'] = data.notes,
-		['@author'] = data.author
-	}, function()
+	exports.oxmysql:insert('INSERT INTO `mdt_warrants` (`name`, `char_id`, `report_id`, `report_title`, `charges`, `date`, `expire`, `notes`, `author`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', {data.name, data.char_id, data.report_id, data.report_title, data.charges, data.date, data.expire, data.notes, data.author}, function()
 		TriggerClientEvent("mdt:completedWarrantAction", usource)
 		TriggerClientEvent("mdt:sendNotification", usource, "A new warrant has been created.")
 	end)
@@ -479,9 +387,7 @@ end)
 RegisterServerEvent("mdt:deleteWarrant")
 AddEventHandler("mdt:deleteWarrant", function(id)
 	local usource = source
-	exports.ghmattimysql:execute('DELETE FROM `mdt_warrants` WHERE `id` = @id', {
-		['@id']  = id
-	}, function()
+	exports.oxmysql:execute('DELETE FROM `mdt_warrants` WHERE `id` = ?', {id}, function()
 		TriggerClientEvent("mdt:completedWarrantAction", usource)
 	end)
 	TriggerClientEvent("mdt:sendNotification", usource, "Warrant has been successfully deleted.")
@@ -491,9 +397,7 @@ RegisterServerEvent("mdt:getReportDetailsById")
 AddEventHandler("mdt:getReportDetailsById", function(query, _source)
 	if _source then source = _source end
 	local usource = source
-	exports['ghmattimysql']:execute("SELECT * FROM `mdt_reports` WHERE `id` = @query", {
-		['@query'] = query
-	}, function(result)
+	exports.oxmysql:fetch("SELECT * FROM `mdt_reports` WHERE `id` = ?", {query}, function(result)
 		if result and result[1] then
 			result[1].charges = json.decode(result[1].charges)
 			TriggerClientEvent("mdt:returnReportDetails", usource, result[1])
@@ -583,21 +487,11 @@ RegisterServerEvent("mdt:saveVehicleChanges")
 AddEventHandler("mdt:saveVehicleChanges", function(data)
 	if data.stolen then data.stolen = 1 else data.stolen = 0 end
 	local usource = source
-	exports['ghmattimysql']:execute('SELECT * FROM `vehicle_mdt` WHERE `plate` = @plate', {
-		['@plate'] = data.plate
-	}, function(result)
+	exports.oxmysql:fetch('SELECT * FROM `vehicle_mdt` WHERE `plate` = ?', {data.plate}, function(result)
 		if result[1] then
-			exports.ghmattimysql:execute('UPDATE `vehicle_mdt` SET `stolen` = @stolen, `notes` = @notes WHERE `plate` = @plate', {
-				['@plate'] = data.plate,
-				['@stolen'] = data.stolen,
-				['@notes'] = data.notes
-			})
+			exports.oxmysql:execute('UPDATE `vehicle_mdt` SET `stolen` = ?, `notes` = ? WHERE `plate` = ?', {data.plate, data.stolen, data.notes})
 		else
-			exports.ghmattimysql:execute('INSERT INTO `vehicle_mdt` (`plate`, `stolen`, `notes`) VALUES (@plate, @stolen, @notes)', {
-				['@plate'] = data.plate,
-				['@stolen'] = data.stolen,
-				['@notes'] = data.notes
-			})
+			exports.oxmysql:insert('INSERT INTO `vehicle_mdt` (`plate`, `stolen`, `notes`) VALUES (?, ?, ?)', {data.plate, data.stolen, data.notes})
 		end
 		
 		TriggerClientEvent("mdt:sendNotification", usource, "Vehicle changes have been saved.")
@@ -617,6 +511,8 @@ function GetLicenses(identifier, cb)
 
 				if type == "driver" then
 					licenseType = "driver_license" label = "Drivers License"
+				elseif type == "weapon" then
+					licenseType = "weapon_license" label = "Weapons License"
 				end
 
 				table.insert(licenses, {
