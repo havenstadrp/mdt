@@ -97,7 +97,7 @@ AddEventHandler("mdt:getOffenderDetails", function(offender)
                     offender.haswarrant = true
                 end
 
-				exports.oxmysql:fetch('SELECT * FROM `player_vehicles` WHERE `citizenid` = ?', {}, function(vehicles)
+				exports.oxmysql:fetch('SELECT * FROM `player_vehicles` WHERE `citizenid` = ?', {offender.id}, function(vehicles)
 					for i = 1, #vehicles do
 						vehicles[i].model = vehicles[i].vehicle
 						if vehicles[i].mods then
