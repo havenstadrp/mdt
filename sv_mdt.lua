@@ -207,17 +207,13 @@ AddEventHandler("mdt:saveOffenderChanges", function(id, changes, identifier)
 		else
 			exports.oxmysql:insert('INSERT INTO `user_mdt` (`char_id`, `notes`, `mugshot_url`, `bail`) VALUES (?, ?, ?, ?)', {id, changes.notes, changes.mugshot_url, changes.bail})
 		end
-		if #changes.licenses_removed > 0 then
-		    exports.oxmysql:fetch('SELECT `citizenid` FROM `players` WHERE `id` = ?', {id}, function(result)  -- get citizen id
-				local player = QBCore.Functions.GetPlayerByCitizenId(result[1]["citizenid"])
-				if player ~= nil then
-					local playerLicenses = player.PlayerData.metadata["licences"]
-					for i = 1, #changes.licenses_removed do
-						playerLicenses[changes.licenses_removed[i]["type"]:sub(1, -9)] = false
-					end
-					player.Functions.SetMetaData("licences", playerLicenses)
-				end
-			end)
+		if changes.licenses_removed ~= nil then
+			local player = QBCore.Functions.GetPlayer(usource)
+			local playerLicenses = player.PlayerData.metadata["licences"]
+			for i = 1, #changes.licenses_removed do
+				playerLicenses[changes.licenses_removed[i]["type"]:sub(1, -9)] = false
+			end
+			player.Functions.SetMetaData("licences", playerLicenses)
 		end
 
 		if changes.convictions ~= nil then
