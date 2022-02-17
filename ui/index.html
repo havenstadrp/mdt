@@ -1,35 +1,35 @@
 <html style="overflow-y: hidden;">
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.2/css/all.css">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="main.css">
     <link rel="stylesheet" type="text/css" href="styles/police.css">
     <style>
         body {
             display: none;
             user-select: none;
+  
         }
     </style>
 </head>
 <body>
     <div id="container">
         <div v-bind:class="getClass('content')">
-            <div v-bind:class="getClass('line')" style="top: 10%;"></div>
-            <img v-if="officer.department == 'police'" src="badges/police.png" v-bind:class="getClass('badge')" >
-            <img src="footer.png" id="banner" >
-            
-            <p v-if="officer.department == 'police'" style="font-family: 'Georgia'; font-style: italic; font-size: 20pt; text-align: center;">Los Santos Police Department</p>
-            <p style="position: fixed; left: 17%; top: 5.5%">Welcome, {{ officer.rank }}{{ officer.name }}.</p>
-            <button type="button" v-on:click="closeMDT()" style="position: fixed; right: 10%; top: 5.5%">LOGOUT</button>
-
-            <div style="position: fixed; left: 16%; top: 10.5%;">
+            <p style="font-family: 'Poppins'; font-style: sans-serif; font-size: 20pt; text-align: center; color: #ffbb24;">San Andreas State Database</p>
+            <p style="text-align: center;">Welcome, {{ officer.rank }}{{ officer.name }}.</p>
+            <div class="wrapper">
+            <div class="sidebar"style="position: fixed; left: 1%; top: 0%; bottom: 3%;">
+                <img src="badges/police.png" width="120" height="120" style="position: relative; left: 17%; top: 1%;">
+                <h2></h2>
+                <button type="button" v-on:click="closeMDT()" style="position: fixed; left: 1%; bottom: 3%; width: 12%">LOGOUT</button>
                 <ul>
-                    <li v-on:click="changePage('Home')" id="home" >Home</li>
-                    <li v-on:click="changePage('Search Offenders')" id="search-offenders" >Search Persons</li>
-                    <li v-on:click="changePage('Search Vehicles')" id="search-vehicles" >Search Vehicles</li>
-                    <li v-on:click="changePage('Search Reports')" id="search-reports" >Search Reports</li>
-                    <li v-on:click="changePage('Submit Report')" id="submit-report" >Create Report</li>
-                    <li v-on:click="changePage('Calls')" id="calls" >Calls</li>
-                    <li v-on:click="changePage('Warrants')" id="warrants" >Warrants</li>
+                    <li v-on:click="changePage('Home')" id="home"><i class="fas fa-home"></i>&nbsp;&nbsp;Home</li>
+                    <li v-on:click="changePage('Search Offenders')" id="search-offenders" ><i class="fas fa-user-friends"></i>&nbsp;&nbsp;Search Citizen</li>
+                    <li v-on:click="changePage('Search Vehicles')" id="search-vehicles" ><i class="fas fa-car"></i>&nbsp;&nbsp;Search Vehicles</li>
+                    <li v-on:click="changePage('Search Reports')" id="search-reports" ><i class="fas fa-book"></i>&nbsp;&nbsp;Search Reports</li>
+                    <li v-on:click="changePage('Submit Report')" id="submit-report" ><i class="fas fa-edit"></i>&nbsp;&nbsp;Create Report</li>
+                    <li v-on:click="changePage('Calls')" id="calls" ><i class="fas fa-bell"></i>&nbsp;&nbsp;Calls</li>
+                    <li v-on:click="changePage('Warrants')" id="warrants" ><i class="fas fa-user-clock"></i>&nbsp;&nbsp;Warrants</li>
                 </ul>
             </div>
 
@@ -38,7 +38,7 @@
 
                     <h2 class="page-title">HOME</h2>
         
-                    <div class="left-side" style="width: 400px; position: absolute; float: unset;">
+                    <div class="left-side" style="width: 400px; position: absolute; float: unset; left: 5%;">
                         <h3>RECENT REPORTS</h3>
                         <br />
                         <h4 v-if="homepage.reports == false"> ... </h4>
@@ -49,7 +49,7 @@
                         </span>
                     </div>
 
-                    <div class="left-side" style="width: 400px; position: absolute; top: 55%;">
+                    <div class="left-side" style="width: 400px; position: absolute; top: 55%; left: 5%;">
                         <h3>PERSON SEARCHES</h3>
                         <br />
                         <h4 v-if="recent_searches.person.length == 0"> ... </h4>
@@ -59,7 +59,7 @@
                         </span>
                     </div>
 
-                    <div class="right-side" style="width: 400px; position: absolute; float: unset;">
+                    <div class="right-side" style="width: 400px; position: absolute; float: unset; left: 75%;">
                         <h3>RECENT WARRANTS</h3>
                         <br />
                         <h4 v-if="homepage.warrants == false"> ... </h4>
@@ -70,7 +70,7 @@
                         </span>
                     </div>
 
-                    <div class="right-side" style="width: 400px; position: absolute; top: 55%;">
+                    <div class="right-side" style="width: 400px; position: absolute; top: 55%; left: 75%;">
                         <h3>VEHICLE SEARCHES</h3>
                         <br />
                         <h4 v-if="recent_searches.vehicle.length == 0"> ... </h4>
@@ -94,7 +94,7 @@
                     
                     <br />
 
-                    <div class="left-side" style="max-height: 450px; width: 500px;">
+                    <div class="left-side" style="max-height: 450px; width: 500px">
                         <h3>DATE</h3>
                         <h4 v-if="report_selected.date"> {{ report_selected.date }} </h4>
                         <h4 v-else-if="report_selected.date == null"> ... </h4>
@@ -157,6 +157,7 @@
                                 </h4>
                             </span>
                             <h4 v-if="report_new.recommended_fine > 0">Fine: ${{report_new.recommended_fine}}</h4>
+                            <h4 v-if="report_new.recommended_sentence > 0">Sentence: {{report_new.recommended_sentence}} months</h4>
                             <br />
                             <button v-if="report_new.char_id && report_new.incident && report_new.title" v-on:click="SubmitNewReport()" type="button" style="margin-top: 20px">SUBMIT REPORT</button>
                             <button v-if="report_new.focus == 'charges'" v-on:click="report_new.focus = 'name'" type="button" style="margin-top: 20px">SEARCH OFFENDER</button>
@@ -542,7 +543,7 @@
                     <h2 class="page-title">CALL MONITOR</h2>
                     <h4 v-if="Object.keys(calls).length == 0" style="text-align: center; font-size: 20px; font-weight: bold; margin-top: 20px;">No incoming calls.</h4>
                     <div style="margin: 0 auto; width: 100%; max-height: 90%; overflow-y: auto; margin-top: 20px;" v-if="Object.keys(calls).length > 0">
-                        <table style="margin: 0 auto; width: 95%;">
+                        <table style="margin: 0 auto; width: 90%;">
                             <tr>
                                 <th>#</th>
                                 <th>Caller</th>
@@ -613,11 +614,8 @@
                 <div id="notification" v-bind:class="getClass('notification')">
                     <h4>{{notify}}</h4>
                 </div>
-                <p style="position: fixed; left: 2%; bottom: 0%; padding: 20px;" v-on:click="showNotification('Made by distritic (github.com/distritic)')">*</p>
+                <p style="position: fixed; left: 2%; bottom: 0%; padding: 20px;" v-on:click="showNotification('Made by Wrex/Distritic')"></p>
             </main>
-            
-            <p v-if="officer.department == 'police'" style="font-family: 'Georgia'; font-style: italic; font-size: 20pt; position: fixed; bottom: 1%; right: 5.5%; direction: rtl;">Obey & Survive</p>
-            <div v-bind:class="getClass('line2')" style="bottom: 10%"></div>
         </div>
     </div>
 
